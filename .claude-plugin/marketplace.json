@@ -11,7 +11,7 @@
     {
       "name": "bumpwise",
       "source": "./",
-      "description": "Checks whether a change to a Java or Kotlin library breaks the API of its last published release, and which version comes next. Free.",
+      "description": "Checks whether a change to a Java or Kotlin library breaks the API of its last published release, and what a dependency upgrade breaks in your code. Free.",
       "homepage": "https://gilware.com/bumpwise/cli/",
       "keywords": ["java", "kotlin", "api-compatibility", "semver", "breaking-changes", "mcp"]
     }
