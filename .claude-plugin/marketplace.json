@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "gilware",
+  "owner": {
+    "name": "Gilware",
+    "url": "https://gilware.com",
+    "email": "hello@gilware.com"
+  },
+  "description": "Gilware plugins for Claude Code.",
+  "plugins": [
+    {
+      "name": "bumpwise",
+      "source": "./",
+      "description": "Checks whether a change to a Java or Kotlin library breaks the API of its last published release, and which version comes next. Free.",
+      "homepage": "https://gilware.com/bumpwise/cli/",
+      "keywords": ["java", "kotlin", "api-compatibility", "semver", "breaking-changes", "mcp"]
+    }
+  ]
+}

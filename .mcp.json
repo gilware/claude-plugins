@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "bumpwise": {
+      "command": "java",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/launcher/Bumpwise.java", "mcp"]
+    }
+  }
+}
