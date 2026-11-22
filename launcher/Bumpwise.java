@@ -3,8 +3,9 @@
 //
 // - Uses the jar the installer put in place (~/.local/share/bumpwise/bumpwise.jar, on Windows
 //   %LOCALAPPDATA%\Bumpwise\bumpwise.jar), or the one named by BUMPWISE_JAR.
-// - With no jar yet, downloads bumpwise-<VERSION>.jar from gilware.com once, checks its SHA-256 and saves it there.
-//   Nothing else is downloaded and nothing is sent.
+// - With no jar yet, or an older one than VERSION, downloads bumpwise-<VERSION>.jar from gilware.com, checks its
+//   SHA-256 and saves it there (a jar named by BUMPWISE_JAR is never replaced). Nothing else is downloaded and
+//   nothing is sent. If that download fails, an older jar that is already there is still used.
 // - Then runs the jar in this same JVM. Messages go to stderr: stdout carries only MCP messages.
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.HexFormat;
+import java.util.jar.JarFile;
 
 public class Bumpwise {
 
@@ -37,7 +39,20 @@ public class Bumpwise {
         }
         var jar = jar();
         if (!Files.isRegularFile(jar)) {
-            download(jar);
+            System.err.println("bumpwise: first start, downloading " + URL + " to " + jar);
+            var problem = download(jar);
+            if (problem != null) {
+                fail(problem);
+            }
+        } else if (System.getenv("BUMPWISE_JAR") == null || System.getenv("BUMPWISE_JAR").isBlank()) {
+            var installed = version(jar);
+            if (installed != null && older(installed, VERSION)) {
+                System.err.println("bumpwise: updating " + jar + " from " + installed + " to " + VERSION);
+                var problem = download(jar);
+                if (problem != null) {
+                    System.err.println("bumpwise: " + problem + " Using " + installed + " for now.");
+                }
+            }
         }
         run(jar, args);
     }
@@ -54,8 +69,37 @@ public class Bumpwise {
         return Path.of(System.getProperty("user.home"), ".local", "share", "bumpwise", "bumpwise.jar");
     }
 
-    static void download(Path jar) throws IOException, InterruptedException {
-        System.err.println("bumpwise: first start, downloading " + URL + " to " + jar);
+    /** The Implementation-Version of a jar, or null when it has none or cannot be read. */
+    static String version(Path jar) {
+        try (var file = new JarFile(jar.toFile())) {
+            var manifest = file.getManifest();
+            return manifest == null ? null : manifest.getMainAttributes().getValue("Implementation-Version");
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    /** Whether dotted version {@code a} (1.1.0) is older than {@code b}; anything that is not plain numbers is not older. */
+    static boolean older(String a, String b) {
+        var x = a.trim().split("\\.");
+        var y = b.trim().split("\\.");
+        for (int i = 0; i < Math.max(x.length, y.length); i++) {
+            int p, q;
+            try {
+                p = i < x.length ? Integer.parseInt(x[i]) : 0;
+                q = i < y.length ? Integer.parseInt(y[i]) : 0;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+            if (p != q) {
+                return p < q;
+            }
+        }
+        return false;
+    }
+
+    /** Downloads the pinned jar to {@code jar}; returns null when done, or what went wrong (nothing is changed then). */
+    static String download(Path jar) throws IOException, InterruptedException {
         Files.createDirectories(jar.getParent());
         var part = jar.resolveSibling(".download.part");
         var client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL)
@@ -67,19 +111,19 @@ public class Bumpwise {
             response = client.send(request, HttpResponse.BodyHandlers.ofFile(part));
         } catch (IOException e) {
             Files.deleteIfExists(part);
-            fail("the download from " + URL + " failed (" + e.getMessage() + "). Check the internet connection and restart Claude Code.");
-            return;
+            return "the download from " + URL + " failed (" + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()) + "). Check the internet connection and restart Claude Code.";
         }
         if (response.statusCode() != 200) {
             Files.deleteIfExists(part);
-            fail("the download from " + URL + " failed with HTTP " + response.statusCode() + ". Try again later.");
+            return "the download from " + URL + " failed with HTTP " + response.statusCode() + ". Try again later.";
         }
         if (!SHA256.equals(sha256(part))) {
             Files.deleteIfExists(part);
-            fail("the downloaded file is not the published one (SHA-256 mismatch). Nothing was changed; try again later.");
+            return "the downloaded file is not the published one (SHA-256 mismatch). Nothing was changed; try again later.";
         }
         Files.move(part, jar, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         System.err.println("bumpwise: installed " + VERSION);
+        return null;
     }
 
     static String sha256(Path file) throws IOException {

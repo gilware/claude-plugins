@@ -20,7 +20,9 @@ You need Java 17 or later.
 
 The first time it starts, the plugin downloads the Bumpwise command line (about 3.6 MB) from gilware.com, checks
 its SHA-256 and saves it as `~/.local/share/bumpwise/bumpwise.jar` (`%LOCALAPPDATA%\Bumpwise\bumpwise.jar` on
-Windows). If you already installed the command line with the installer, the plugin uses that jar.
+Windows). If you already installed the command line with the installer, the plugin uses that jar, and replaces
+it with the version the plugin needs when it is older. To use a jar of your own, set `BUMPWISE_JAR`; the plugin
+never replaces that one.
 
 If the installer also set up Bumpwise for Claude Code, remove that setup, or Claude will see the tool twice:
 
