@@ -26,8 +26,8 @@ import java.util.HexFormat;
 
 public class Bumpwise {
 
-    static final String VERSION = "1.1.0";
-    static final String SHA256 = "a26e3bf8894f7640acbae604502b0341cf1e894bd084737ba3bc1eae2d65b976";
+    static final String VERSION = "1.1.1";
+    static final String SHA256 = "3a3e8ee2fe8e87b1b11d4ad07294c0b4114d420e04254b95596617b07ca76b25";
     static final String URL = "https://gilware.com/bumpwise/cli/bumpwise-" + VERSION + ".jar";
 
     public static void main(String[] args) throws Exception {
