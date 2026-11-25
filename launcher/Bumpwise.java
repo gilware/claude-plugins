@@ -28,8 +28,8 @@ import java.util.jar.JarFile;
 
 public class Bumpwise {
 
-    static final String VERSION = "1.1.1";
-    static final String SHA256 = "3a3e8ee2fe8e87b1b11d4ad07294c0b4114d420e04254b95596617b07ca76b25";
+    static final String VERSION = "1.1.2";
+    static final String SHA256 = "ccf11e8f55c3c8e967689aa54e8697a813e3e369e77e2c1efa751f64c6bc4d49";
     static final String URL = "https://gilware.com/bumpwise/cli/bumpwise-" + VERSION + ".jar";
 
     public static void main(String[] args) throws Exception {
