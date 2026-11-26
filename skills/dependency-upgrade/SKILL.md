@@ -1,6 +1,6 @@
 ---
 name: dependency-upgrade
-description: Check what a dependency upgrade breaks in a Java or Kotlin project (Maven or Gradle) with Bumpwise, before changing the version. Use when asked to upgrade, bump or update a dependency, to review a Dependabot or Renovate pull request, or when a build fails after a version change with NoSuchMethodError, NoClassDefFoundError or a missing method.
+description: Check what a dependency upgrade breaks in a Java or Kotlin project (Maven or Gradle) with Bumpwise, before changing the version, including a BOM such as compose-bom or spring-boot-dependencies. Use when asked to upgrade, bump or update a dependency, to review a Dependabot or Renovate pull request, or when a build fails after a version change with NoSuchMethodError, NoClassDefFoundError or a missing method.
 ---
 
 # Check a dependency upgrade
@@ -26,6 +26,12 @@ in the project's compiled classes: the places (file:line) that will stop compili
 - **Breaks places:** change the version and fix each listed place (a moved class: the new name; a removed method:
   look in the new version's API or release notes for the replacement). Build again and run the tests.
 - **Marked source only:** compiled code still runs, but recompiling fails; fix it the same way.
+- **A BOM** (`androidx.compose:compose-bom`, Firebase's `com.google.firebase:firebase-bom`,
+  `org.springframework.boot:spring-boot-dependencies`): pass the BOM itself as `dependency`. The answer starts with a
+  line about the BOM (how many of the project's libraries change version), then gives one result per library it
+  moves. Where the build sets its own version of one of those libraries, Bumpwise checks the version the build will
+  use. A library marked "cannot tell" (Bumpwise could not read its version, or the build changes how Gradle picks
+  versions) needs a check of its own with its `GROUP:ARTIFACT`.
 - **Several dependencies changed** (a Dependabot or Renovate update): in a terminal,
   `bumpwise upgrade --changed-since origin/main` checks every version the branch changed.
 
