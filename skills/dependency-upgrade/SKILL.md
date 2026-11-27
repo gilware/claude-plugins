@@ -26,6 +26,10 @@ in the project's compiled classes: the places (file:line) that will stop compili
 - **Breaks places:** change the version and fix each listed place (a moved class: the new name; a removed method:
   look in the new version's API or release notes for the replacement). Build again and run the tests.
 - **Marked source only:** compiled code still runs, but recompiling fails; fix it the same way.
+- **Raises minSdk** (Android libraries): the new version needs a higher minSdk than the project's, so the build
+  fails at the manifest merge. Tell the user; raising the app's minSdk drops older devices, so it is their decision.
+  Otherwise stay on the current version. If Bumpwise could not read the project's minSdk, say which minSdk the new
+  version needs.
 - **A BOM** (`androidx.compose:compose-bom`, Firebase's `com.google.firebase:firebase-bom`,
   `org.springframework.boot:spring-boot-dependencies`): pass the BOM itself as `dependency`. The answer starts with a
   line about the BOM (how many of the project's libraries change version), then gives one result per library it
